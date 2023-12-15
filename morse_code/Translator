@@ -1,0 +1,77 @@
+import RPi.GPIO as GPIO
+import time
+
+LED_PIN = 18  # Modifica questo valore con il numero del pin GPIO
+DOT_DURATION = 0.2  # Durata in secondi del punto (0.2 secondi)
+DASH_DURATION = 0.6  # Durata in secondi del trattino (0.6 secondi)
+DURATA_TRA_LETTERE = 0.6  # Durata in secondi dello spazio tra i caratteri
+DURATA_TRA_PAROLE = 1.4  # Durata in secondi dello spazio tra le parole
+
+morse_code = {
+    # lettere
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
+    'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.',
+    'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--', 'Z': '--..', 
+    
+    # lettere accentate
+    'À': 'A', 'È': 'E', 'É': 'E', 'Ì': 'I', 'Ò': 'O', 'Ù': 'U',
+
+    # numeri
+    '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+    '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+
+    #Simboli
+    '.': '-',   ',': '---',
+
+    # Spazio tra le parole
+    ' ': ' '  
+}
+
+def setup():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(LED_PIN, GPIO.OUT)
+
+def cleanup():
+    GPIO.cleanup()
+
+def transmit_morse_code(message):
+    for char in message:
+        char = char.upper()
+
+        if char in morse_code:
+            transmit_character(morse_code[char])
+        else:
+            time.sleep(DURATA_TRA_PAROLE)  # Spazio tra le parole
+
+        time.sleep(DURATA_TRA_LETTERE)  # Spazio tra le lettere
+
+def transmit_character(character):
+    for signal in character:
+        if signal == '.':
+            # Punto
+            GPIO.output(LED_PIN, GPIO.HIGH)
+            time.sleep(DOT_DURATION)
+        elif signal == '-':
+            # Trattino
+            GPIO.output(LED_PIN, GPIO.HIGH)
+            time.sleep(DASH_DURATION)
+
+        GPIO.output(LED_PIN, GPIO.LOW)
+        time.sleep(DOT_DURATION)  # Spazio tra i segnali
+
+if __name__ == '__main__':
+    try:
+        setup()
+
+        # Scrivi qui il tuo messaggio in codice Morse
+        message = "HELLO WORLD 123"
+
+        # Trasmetti il messaggio in codice Morse
+        transmit_morse_code(message)
+
+    except KeyboardInterrupt:
+        pass
+
+    finally:
+        cleanup()
